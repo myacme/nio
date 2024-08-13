@@ -1,0 +1,1 @@
+清空文件数据：echo "" > （catalina.out）
