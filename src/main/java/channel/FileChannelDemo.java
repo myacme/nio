@@ -1,11 +1,16 @@
 package channel;
 
 
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * @author ljx
@@ -46,6 +51,21 @@ public class FileChannelDemo {
         rafile.close();
     }
 
+    /**
+     * 文件复制Files.copy
+     * @throws IOException
+     */
+    public void FilesCopy() throws IOException {
+        Path source = Paths.get("r0.txt");
+        Path target = Paths.get("w0.txt");
+        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /**
+     * 零拷贝
+     *
+     * @throws Exception
+     */
     public static void transfer() throws Exception {
         RandomAccessFile rafile = new RandomAccessFile("r0.txt", "rw");
         FileChannel channel = rafile.getChannel();
@@ -57,6 +77,20 @@ public class FileChannelDemo {
         channel.close();
         rafile2.close();
         rafile.close();
+    }
+
+    /**
+     * 内存映射mmap
+     *
+     * @throws IOException
+     */
+    public void map() throws IOException {
+        try (RandomAccessFile sourceFile = new RandomAccessFile("r0.txt", "r");
+             RandomAccessFile targetFile = new RandomAccessFile("w0.txt", "rw")) {
+            FileChannel sourceChannel = sourceFile.getChannel();
+            MappedByteBuffer buffer = sourceChannel.map(FileChannel.MapMode.READ_ONLY, 0, sourceChannel.size());
+            targetFile.getChannel().write(buffer);
+        }
     }
 
     public static void main(String[] args) throws Exception {
